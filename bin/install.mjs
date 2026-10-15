@@ -106,8 +106,18 @@ function buildBlock() {
     const m = /^(\s*-?\s*name:)\s*(?:'([^']*)'|"([^"]*)"|([^\s#]+))\s*(#.*)?$/u.exec(line)
     if (m === null) return line
     const spec = m[2] ?? m[3] ?? m[4]
-    if (!spec.startsWith('./') && !spec.startsWith('../')) return line
-    const url = pathToFileURL(path.resolve(dest, spec)).href
+    // 包内插件行（包名子路径，或 ./ 相对路径）一律落成**安装位置的绝对 file URL**：
+    // 兜底安装器把包放在 <DSH主目录>/dsh-sylphiette-agent/，并不经过 profile 的 node_modules，
+    // 所以包名在这里解析不到；而把 ./ 内联进 profile patch 后，它又会按 profile 目录解析。
+    // 两种形态都落成绝对路径最稳。
+    const SELF = {
+      'dsh-sylphiette-agent/lore': 'lib/sylphiette-lore.mjs',
+      './lib/sylphiette-lore.mjs': 'lib/sylphiette-lore.mjs',
+      '../lib/sylphiette-lore.mjs': 'lib/sylphiette-lore.mjs',
+    }
+    const rel = SELF[spec]
+    if (rel === undefined) return line
+    const url = pathToFileURL(path.join(dest, rel)).href
     return `${m[1]} '${url}'${m[5] === undefined ? '' : ` ${m[5]}`}`
   })
   return [MARK_BEGIN, ...out, MARK_END].join('\n')

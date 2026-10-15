@@ -6,8 +6,12 @@
 #   · persona          —— 人设正文（complete:true：人设＝唯一系统提示词；includeRuntimeContext:false）
 #   · sylphiette-lore  —— 453 条六面世界设定：命中关键词才注入系统提示 + lore_lookup 检索工具
 #
-# patch 里的 ./ 路径（lib/sylphiette-lore.mjs）由 DSH 按本文件位置转成 file URL，
-# 所以整包可以被装到任意目录，不必改配置。
+# patch 里的插件行必须用**包名子路径**（dsh-sylphiette-agent/lore），不能用 ./ 相对路径：
+#   DSH 的 anchorInsertedPluginNames 只转换 patch insert **本层**的 name（以及 group.config 那种形式），
+#   不会递归进 preset 行 config.plugins 里的嵌套插件行。写 ./ 的话相对名会保持原样、被当作相对
+#   **profile 目录**解析（profiles/<p>/lib/... 并不存在）→ 模块 import 失败 → 插件 fiber 永远起不来
+#   （persona 是纯文本 config 所以照样能起，于是现象是「人设对、世界书和 lore_lookup 全哑」）。
+#   包名由 DSH 从 profile 的 node_modules 解析（profile/node_modules/dsh-sylphiette-agent/）。
 #
 # 成人向（NSFW）内容，仅供成年人在本地个人使用。
 - insert:
@@ -167,7 +171,7 @@
               complete: true
               includeRuntimeContext: false
           - id: sylphiette-lore
-            name: './lib/sylphiette-lore.mjs'
+            name: 'dsh-sylphiette-agent/lore'
             config:
               enabled: true
               lorebook: '../data/lorebook.zh.json'   # 由插件按自身位置解析，见 lib/sylphiette-lore.mjs

@@ -43,7 +43,7 @@ dsh plugin --profile <profile> add github:JunYingLingLan/dsh-sylphiette-agent
 **不想装 git？用 Release 里的 tgz**（`dsh plugin` 支持 tarball URL，不需要 git）：
 
 ```bash
-dsh plugin --profile <profile> add https://github.com/JunYingLingLan/dsh-sylphiette-agent/releases/download/v1.0.0/dsh-sylphiette-agent-1.0.0.tgz
+dsh plugin --profile <profile> add https://github.com/JunYingLingLan/dsh-sylphiette-agent/releases/download/v1.0.1/dsh-sylphiette-agent-1.0.1.tgz
 ```
 
 ### 方式二：兜底脚本（不碰 pnpm、不需要 git、不需要 DSH CLI）
@@ -66,10 +66,27 @@ node bin/install.mjs --apply    # 真正安装
 可选参数：`--home <DSH主目录>`、`--profile <名字>`、`--patch <文件>`、`--uninstall --apply`。
 自动探测失败时先加 `--home` 指明位置。
 
-### 装完之后
+### 装完之后 —— 必须重启一次
 
-**刷新 DSH 的 Web 界面**（桌面版默认 `http://127.0.0.1:19387`）；看不到「希露菲」就重启一次 DeepSeek Harness。
-然后新建会话 → Agent 预设 选「希露菲」。
+⚠️ **装完请重启 DeepSeek Harness**（桌面版关掉再打开；`dsh web` 用户重启那个进程）。
+
+实测结论：**新装的 bundle 不会被 HMR 自动加载**。装完立刻看是看不到「希露菲」的——组合产物
+（`profiles/<profile>/cordis.yml`）里也不会有它，因为那份配置是在装包**之前**就组合好的。
+重启后配置重新组合，希露菲才会出现在预设列表里。
+
+重启后：新建会话 → Agent 预设 选「希露菲」。
+
+### v1.0.1 修了什么
+
+v1.0.0 里插件行写的是相对路径 `./lib/sylphiette-lore.mjs`，那是错的：
+DSH 的 `anchorInsertedPluginNames` 只转换 patch `insert` **本层**的 name（以及 `group.config` 那种形式），
+**不会递归进 preset 行 `config.plugins` 里的嵌套插件行**。于是这个相对名被当作相对 **profile 目录**解析
+（`profiles/<p>/lib/...` 并不存在）→ 模块 import 失败 → 插件 fiber 永远起不来。
+现象很隐蔽：**persona 是纯文本 config 所以照样生效（人设对），但世界书和 `lore_lookup` 全哑**。
+
+v1.0.1 改用**包名子路径** `dsh-sylphiette-agent/lore` —— 由 DSH 从 profile 的 `node_modules`
+解析（`createRequire(baseUrl).resolve(...)`，与 `dsh-astrbot-ingress` 同一机制）。
+兜底安装器 `bin/install.mjs` 则把它落成安装位置的绝对 `file://` URL。
 
 ## 她是谁
 
