@@ -1,0 +1,58 @@
+{
+  "name": "dsh-sylphiette-agent",
+  "version": "1.0.0",
+  "description": "希露菲（Sylphiette）· DeepSeek Harness 角色扮演预设：中文人设 + 453 条六面世界设定按需注入",
+  "license": "MIT",
+  "author": "JunYingLingLan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JunYingLingLan/dsh-sylphiette-agent.git"
+  },
+  "homepage": "https://github.com/JunYingLingLan/dsh-sylphiette-agent#readme",
+  "bugs": {
+    "url": "https://github.com/JunYingLingLan/dsh-sylphiette-agent/issues"
+  },
+  "type": "module",
+  "main": "lib/sylphiette-lore.mjs",
+  "exports": {
+    ".": "./lib/sylphiette-lore.mjs",
+    "./lore": "./lib/sylphiette-lore.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-sylphiette-install": "./bin/install.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "data",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-preset",
+    "deepseek-harness",
+    "roleplay",
+    "sylphiette",
+    "mushoku-tensei"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
